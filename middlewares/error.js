@@ -14,9 +14,9 @@ const errorHandler = (err, req, res, next) => {
     error = new ErrorRespnose(message, 404);
   }
 
-  res.status(err.statusCode || 500).json({
+  res.status(error.statusCode || 500).json({
     success: false,
-    error: err.message
+    error: error.message || 'Server Error'
   });
 }
 
