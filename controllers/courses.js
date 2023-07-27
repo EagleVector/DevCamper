@@ -20,7 +20,7 @@ exports.getCourses = asyncHandler(async (req, res, next) => {
     })
   } else {
     res.status(200).json(res.advancedResults);
-    }
+  }
 });
 
 // @desc        GET single course
@@ -50,6 +50,7 @@ exports.getCourse = asyncHandler(async (req, res, next) => {
 
 exports.addCourse = asyncHandler(async (req, res, next) => {
   req.body.bootcamp = req.params.bootcampId;
+  req.body.user = req.user.id;
 
   const bootcamp = await Bootcamp.findById(req.params.bootcampId);
 
@@ -57,6 +58,16 @@ exports.addCourse = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse(
       `No bootcamp with the id of ${req.params.bootcampId}`),
       404
+    );
+  }
+
+  // Make Sure user is bootcamp owner
+  if (bootcamp.user.toString() !== req.user.id && req.user.role !== 'admin') {
+    return next(
+      new ErrorRespnose(
+        `User ${req.user.id} is not authorized to add a course to bootcamp ${bootcamp._id}`,
+        401
+      )
     );
   }
 
@@ -77,9 +88,19 @@ exports.updateCourse = asyncHandler(async (req, res, next) => {
 
   if (!course) {
     return next(
-      new ErrorRespnose(`No course with the id of ${req.params.bootcampId}`),
+      new ErrorRespnose(`No course with the id of ${req.params.id}`),
       404
     );
+  }
+
+  // Make Sure user is course owner
+  if (course.user.toString() !== req.user.id && req.user.role !== 'admin') {
+    return next(
+      new ErrorRespnose(
+        `User ${req.user.id} is not authorized to update this course ${course._id}`,
+        401
+      )
+    )
   }
 
   course = await Course.findByIdAndUpdate(req.params.id, req.body, {
@@ -98,7 +119,7 @@ exports.updateCourse = asyncHandler(async (req, res, next) => {
 // @access      Private
 
 exports.deleteCourse = asyncHandler(async (req, res, next) => {
-  const course = await Course.findByIdAndDelete(req.params.id);
+  const course = await Course.findById(req.params.id);
 
   if (!course) {
     return next(
@@ -106,6 +127,18 @@ exports.deleteCourse = asyncHandler(async (req, res, next) => {
       404
     );
   }
+
+  // Make Sure user is course owner
+  if (course.user.toString() !== req.user.id && req.user.role !== 'admin') {
+    return next(
+      new ErrorRespnose(
+        `User ${req.user.id} is not authorized to delete this course ${course._id}`,
+        401
+      )
+    );
+  }
+
+  await course.deleteOne();
 
   res.status(200).json({
     success: true,
