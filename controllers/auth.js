@@ -51,6 +51,23 @@ exports.login = asyncHandler(async (req, res, next) => {
   sendTokenResponse(user, 200, res);
 });
 
+// @desc        Log user out / clear cookie
+// @route       GET /api/v1/auth/logout
+// @access      Private
+
+exports.logout = asyncHandler(async (req, res, next) => {
+  res.cookie('token', 'none', {
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true
+  })
+
+  res.status(200).json({
+    success: true,
+    data: {}
+  })
+});
+
+
 // @desc        Get current logged in user
 // @route       POST /api/v1/auth/me
 // @access      Private
@@ -94,7 +111,7 @@ exports.updatePassword = asyncHandler(async (req, res, next) => {
   const user = await User.findById(req.user.id).select('+password');
 
   // Check current password
-  if(!(await user.matchPassword(req.body.currentPassword))) {
+  if (!(await user.matchPassword(req.body.currentPassword))) {
     return next(new ErrorRespnose('Password is incorrect', 401));
   }
 
@@ -123,7 +140,7 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
 
   // Create reset url
   const resetUrl = `${req.protocol}://${req.get('host')}/api/v1/auth/resetpassword/${resetToken}`;
-  
+
   const subject = 'Password reset Token';
 
   const message = `RESET PASSWORD \n \n Please make a PUT request to: \n \n ${resetUrl}`;
