@@ -3,6 +3,9 @@ const express = require("express");
 const mongoSanitize = require('express-mongo-sanitize');
 const helmet = require("helmet");
 const xss = require("xss-clean");
+const rateLimit = require("express-rate-limit");
+const hpp = require("hpp");
+const cors = require("cors");
 const dotenv = require("dotenv");
 const morgan = require('morgan');
 const colors = require("colors");
@@ -47,6 +50,20 @@ app.use(helmet());
 
 // Cross-Site Scripting Attack prevention
 app.use(xss());
+
+// Request Rate Limiter
+const limiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 100
+});
+
+app.use(limiter);
+
+// Prevent http param pollution
+app.use(hpp());
+
+// Allowing CORS
+app.use(cors());
 
 // Set static folder
 app.use(express.static(path.join(__dirname, 'public')));
