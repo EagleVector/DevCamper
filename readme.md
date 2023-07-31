@@ -2,6 +2,10 @@
 
 > Backend API for the DevCamper application, which is a bootcamp directory website
 
+## Checkout the API documentation
+
+http://www.devcamper.site
+
 ## Usage
 
 Rename "config/config.env.env" to "config/config.env" and update the values/settings to your own
