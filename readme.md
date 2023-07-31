@@ -4,7 +4,9 @@
 
 ## Checkout the API documentation
 
-http://www.devcamper.site
+> SECURE CONNECTION
+
+https://www.devcamper.site
 
 ## Usage
 
